@@ -1,33 +1,33 @@
 /*****************************************************************************
-*   Ä£¿éÃû³Æ : cic_dec
-*   Ä£¿éÃèÊö : CIC³éÈ¡Æ÷Ä£¿é£¬±ØĞëÊ¹ÓÃÓĞ·ûºÅÕûÊı
+*   æ¨¡å—åç§° : cic_dec
+*   æ¨¡å—æè¿° : CICæŠ½å–å™¨æ¨¡å—ï¼Œå¿…é¡»ä½¿ç”¨æœ‰ç¬¦å·æ•´æ•°
 ******************************************************************************/
 module cic_dec
 #(
-    parameter R     = 100,              // ³éÈ¡±¶ÂÊ£¨Decimation factor£©
-    parameter M     = 2 ,               // ²î·ÖÑÓ³Ù£¬±ØĞëÊÇ1»ò2
-    parameter N     = 3 ,               // ½×Êı£¬CICÂË²¨Æ÷µÄ»ı·ÖÆ÷ºÍÎ¢·ÖÆ÷µÄ½×ÊıÏàÍ¬
-    parameter BIN   = 10,               // ÊäÈëÊı¾İÎ»¿í
-    parameter COUT  = 16,               // Êä³ö²Ã¼ôºóµÄÊı¾İÎ»¿í
-    parameter CUT_METHOD = "ROUND",     // ²Ã¼ô·½Ê½£¬ROUNDÎªËÄÉáÎåÈë£¬CUTÎª½Ø¶ÏµÍÎ»
-    parameter BOUT  = 33,               // Êä³öÊı¾İ¿í¶È£¬ÓÃÓÚ·ÀÖ¹Òç³ö£¬ÊÖ¶¯¼ÆËãÎª (BIN + $clog2((R*M)**N))
-    parameter fs    = 20_000_000        // ÊäÈë²ÉÑùÂÊ
+    parameter R     = 100,              // æŠ½å–å€ç‡ï¼ˆDecimation factorï¼‰
+    parameter M     = 2 ,               // å·®åˆ†å»¶è¿Ÿï¼Œå¿…é¡»æ˜¯1æˆ–2
+    parameter N     = 3 ,               // é˜¶æ•°ï¼ŒCICæ»¤æ³¢å™¨çš„ç§¯åˆ†å™¨å’Œå¾®åˆ†å™¨çš„é˜¶æ•°ç›¸åŒ
+    parameter BIN   = 10,               // è¾“å…¥æ•°æ®ä½å®½
+    parameter COUT  = 16,               // è¾“å‡ºè£å‰ªåçš„æ•°æ®ä½å®½
+    parameter CUT_METHOD = "ROUND",     // è£å‰ªæ–¹å¼ï¼ŒROUNDä¸ºå››èˆäº”å…¥ï¼ŒCUTä¸ºæˆªæ–­ä½ä½
+    parameter BOUT  = 33,               // è¾“å‡ºæ•°æ®å®½åº¦ï¼Œç”¨äºé˜²æ­¢æº¢å‡ºï¼Œæ‰‹åŠ¨è®¡ç®—ä¸º (BIN + $clog2((R*M)**N))
+    parameter fs    = 20_000_000        // è¾“å…¥é‡‡æ ·ç‡
 )
 (
-    input   wire            clk     ,   // Ê±ÖÓĞÅºÅ£¬ÆµÂÊµÈÓÚdinµÄ²ÉÑùËÙÂÊ
-    input   wire            rst_n   ,   // ¸´Î»ĞÅºÅ£¬µÍµçÆ½ÓĞĞ§
-    input   wire            enable_cic  ,   // CICÊ¹ÄÜĞÅºÅ£¬¸ßµçÆ½ÓĞĞ§
-    input   wire [BIN-1 :0] din     ,   // ÊäÈëÊı¾İ
-    output  wire [BOUT-1:0] dout    ,   // Ô­Ê¼Êä³öÊı¾İ
-    output  wire [COUT-1:0] dout_cut,   // ²Ã¼ôºóµÄÊä³öÊı¾İ
-    output  wire            dval        // Êä³öÊı¾İÓĞĞ§ĞÅºÅ
+    input   wire            clk     ,   // æ—¶é’Ÿä¿¡å·ï¼Œé¢‘ç‡ç­‰äºdinçš„é‡‡æ ·é€Ÿç‡
+    input   wire            rst_n   ,   // å¤ä½ä¿¡å·ï¼Œä½ç”µå¹³æœ‰æ•ˆ
+    input   wire            enable_cic  ,   // CICä½¿èƒ½ä¿¡å·ï¼Œé«˜ç”µå¹³æœ‰æ•ˆ
+    input   wire [BIN-1 :0] din     ,   // è¾“å…¥æ•°æ®
+    output  wire [BOUT-1:0] dout    ,   // åŸå§‹è¾“å‡ºæ•°æ®
+    output  wire [COUT-1:0] dout_cut,   // è£å‰ªåçš„è¾“å‡ºæ•°æ®
+    output  wire            dval        // è¾“å‡ºæ•°æ®æœ‰æ•ˆä¿¡å·
 );
 
-// ¼ÆËãÊäÈëºÍÊä³öµÄÄÎ¿üË¹ÌØÆµÂÊ
+// è®¡ç®—è¾“å…¥å’Œè¾“å‡ºçš„å¥ˆå¥æ–¯ç‰¹é¢‘ç‡
 localparam fInput_nyquist  = fs / 2;
 localparam fOutput_nyquist = fInput_nyquist / R;
 
-// ÔÚ·ÂÕæÊ±ÏÔÊ¾²ÎÊıĞÅÏ¢
+// åœ¨ä»¿çœŸæ—¶æ˜¾ç¤ºå‚æ•°ä¿¡æ¯
 initial begin
     $display("\n------------CIC_DEC------------\nR   : %0d", R);
     $display("M   : %0d", M);
@@ -41,109 +41,109 @@ initial begin
     $display("cnt0 width         : %0d bits\n", $clog2(R));
 end
 
-// ¸ù¾İ²Ã¼ô·½Ê½Ñ¡Ôñ²Ã¼ôÂß¼­
+// æ ¹æ®è£å‰ªæ–¹å¼é€‰æ‹©è£å‰ªé€»è¾‘
 generate
     if (CUT_METHOD == "ROUND") begin
-        // ËÄÉáÎåÈë²Ã¼ô
+        // å››èˆäº”å…¥è£å‰ª
         wire carry_bit = dout[BOUT-1] ? (dout[BOUT-(COUT-1)-1-1] & (|dout[BOUT-(COUT-1)-1-1-1:0])) : dout[BOUT-(COUT-1)-1-1];
         assign dout_cut = {dout[BOUT-1], dout[BOUT-1:BOUT-(COUT-1)-1]} + carry_bit;
     end else if (CUT_METHOD == "CUT") begin
-        // ½Ø¶Ï²Ã¼ô
+        // æˆªæ–­è£å‰ª
         assign dout_cut = (dout >> (BOUT - COUT));
     end
 endgenerate
 
 /*
-*   »ı·ÖÆ÷Ä£¿é
-*   ½«ÊäÈëĞÅºÅ½øĞĞN½×»ı·Ö
+*   ç§¯åˆ†å™¨æ¨¡å—
+*   å°†è¾“å…¥ä¿¡å·è¿›è¡ŒNé˜¶ç§¯åˆ†
 */
 generate
     genvar i;
     for (i = 0; i < N; i = i + 1) begin : LOOP
-        reg  [BOUT-1:0] inte;             // Ã¿¼¶»ı·ÖÆ÷µÄ¼Ä´æÆ÷
-        wire [BOUT-1:0] sum;              // Ã¿¼¶»ı·ÖÆ÷µÄÊä³öºÍ
+        reg  [BOUT-1:0] inte;             // æ¯çº§ç§¯åˆ†å™¨çš„å¯„å­˜å™¨
+        wire [BOUT-1:0] sum;              // æ¯çº§ç§¯åˆ†å™¨çš„è¾“å‡ºå’Œ
 
         if (i == 0) begin
-            // µÚÒ»½×»ı·ÖÆ÷£¬ÊäÈëÎªÔ­Ê¼Êı¾İdin
+            // ç¬¬ä¸€é˜¶ç§¯åˆ†å™¨ï¼Œè¾“å…¥ä¸ºåŸå§‹æ•°æ®din
             assign sum = inte + {{(BOUT-BIN){din[BIN-1]}}, din};
         end else begin
-            // ºóĞø½×µÄ»ı·ÖÆ÷£¬ÊäÈëÎªÇ°Ò»¼¶»ı·ÖÆ÷µÄÊä³ö
+            // åç»­é˜¶çš„ç§¯åˆ†å™¨ï¼Œè¾“å…¥ä¸ºå‰ä¸€çº§ç§¯åˆ†å™¨çš„è¾“å‡º
             assign sum = inte + (LOOP[i-1].sum);
         end
 
         always @(posedge clk or negedge rst_n) begin
             if (!rst_n)
-                inte <= {(BOUT){1'd0}};   // ¸´Î»Ê±ÇåÁã
-            else if (enable_cic)  // Ìí¼Óenable¿ØÖÆ
+                inte <= {(BOUT){1'd0}};   // å¤ä½æ—¶æ¸…é›¶
+            else if (enable_cic)  // æ·»åŠ enableæ§åˆ¶
                 inte <= sum;
         end    
     end
 endgenerate
 
-// »ñÈ¡×îºóÒ»¼¶»ı·ÖÆ÷µÄÊä³ö
+// è·å–æœ€åä¸€çº§ç§¯åˆ†å™¨çš„è¾“å‡º
 wire [BOUT-1:0] inte_out;
 assign inte_out = LOOP[N-1].sum;
 
 /*
-*   ³éÈ¡Âß¼­
-*   ¸ù¾İ³éÈ¡±¶ÂÊR¿ØÖÆÊä³öËÙÂÊ
+*   æŠ½å–é€»è¾‘
+*   æ ¹æ®æŠ½å–å€ç‡Ræ§åˆ¶è¾“å‡ºé€Ÿç‡
 */
-reg [$clog2(R)-1:0] cnt0;            // ³éÈ¡¼ÆÊıÆ÷
-reg [BOUT-1:0] dec_out;               // ³éÈ¡ºóµÄÊä³öÊı¾İ
-assign dval = enable_cic && (cnt0 == (R-1));        // µ±¼ÆÊıÆ÷´ïµ½R-1Ê±£¬dvalĞÅºÅÎª¸ß£¬±íÊ¾Êı¾İÓĞĞ§
+reg [$clog2(R)-1:0] cnt0;            // æŠ½å–è®¡æ•°å™¨
+reg [BOUT-1:0] dec_out;               // æŠ½å–åçš„è¾“å‡ºæ•°æ®
+assign dval = enable_cic && (cnt0 == (R-1));        // å½“è®¡æ•°å™¨è¾¾åˆ°R-1æ—¶ï¼Œdvalä¿¡å·ä¸ºé«˜ï¼Œè¡¨ç¤ºæ•°æ®æœ‰æ•ˆ
 
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        cnt0    <= 'd0;               // ¸´Î»¼ÆÊıÆ÷
-        dec_out <= 'd0;               // ¸´Î»³éÈ¡ºóµÄÊä³öÊı¾İ
-    end else if (enable_cic) begin  // Ìí¼Óenable¿ØÖÆ
+        cnt0    <= 'd0;               // å¤ä½è®¡æ•°å™¨
+        dec_out <= 'd0;               // å¤ä½æŠ½å–åçš„è¾“å‡ºæ•°æ®
+    end else if (enable_cic) begin  // æ·»åŠ enableæ§åˆ¶
         cnt0    <= dval ? 'd0 : cnt0 + 1'd1;
         dec_out <= dval ? inte_out : dec_out;
     end
 end
 
 /*
-*   Î¢·ÖÆ÷Ä£¿é
-*   ½«³éÈ¡ºóµÄĞÅºÅ½øĞĞN½×²î·Ö´¦Àí
+*   å¾®åˆ†å™¨æ¨¡å—
+*   å°†æŠ½å–åçš„ä¿¡å·è¿›è¡ŒNé˜¶å·®åˆ†å¤„ç†
 */
 generate
     genvar j;
     for (j = 0; j < N; j = j + 1) begin : LOOP2
-        reg  [BOUT-1:0] comb;               // Ã¿¼¶Î¢·ÖÆ÷¼Ä´æÆ÷
-        wire [BOUT-1:0] sub;                // Ã¿¼¶Î¢·ÖÆ÷µÄ²î·Ö½á¹û
+        reg  [BOUT-1:0] comb;               // æ¯çº§å¾®åˆ†å™¨å¯„å­˜å™¨
+        wire [BOUT-1:0] sub;                // æ¯çº§å¾®åˆ†å™¨çš„å·®åˆ†ç»“æœ
 
         if (j == 0) begin
             if (M == 1) begin
-                // ²î·ÖÑÓ³ÙÎª1µÄÇé¿ö
+                // å·®åˆ†å»¶è¿Ÿä¸º1çš„æƒ…å†µ
                 assign sub = dec_out - comb;
                 always @(posedge clk or negedge rst_n) begin
                     if (!rst_n)
-                        comb <= {(BOUT){1'd0}};   // ¸´Î»Î¢·ÖÆ÷¼Ä´æÆ÷
-                    else if (enable_cic && dval)  // Ìí¼Óenable¿ØÖÆ
+                        comb <= {(BOUT){1'd0}};   // å¤ä½å¾®åˆ†å™¨å¯„å­˜å™¨
+                    else if (enable_cic && dval)  // æ·»åŠ enableæ§åˆ¶
                         comb <= dec_out;
                 end  
             end else begin
-                // ²î·ÖÑÓ³ÙÎª2µÄÇé¿ö
+                // å·®åˆ†å»¶è¿Ÿä¸º2çš„æƒ…å†µ
                 reg [BOUT-1:0] comb1;
                 assign sub = dec_out - comb1;
                 always @(posedge clk or negedge rst_n) begin
                     if (!rst_n) begin
                         comb <= {(BOUT){1'd0}};
                         comb1 <= {(BOUT){1'd0}};
-                    end else if (enable_cic && dval) begin  // Ìí¼Óenable¿ØÖÆ
+                    end else if (enable_cic && dval) begin  // æ·»åŠ enableæ§åˆ¶
                         comb <= dec_out;
                         comb1 <= comb;
                     end
                 end  
             end
         end else begin
-            // ºóĞø¼¶µÄÎ¢·ÖÆ÷
+            // åç»­çº§çš„å¾®åˆ†å™¨
             if (M == 1) begin
                 assign sub = LOOP2[j-1].sub - comb;
                 always @(posedge clk or negedge rst_n) begin
                     if (!rst_n)
                         comb <= {(BOUT){1'd0}};
-                    else if (enable_cic && dval)  // Ìí¼Óenable¿ØÖÆ
+                    else if (enable_cic && dval)  // æ·»åŠ enableæ§åˆ¶
                         comb <= LOOP2[j-1].sub;
                 end  
             end else begin
@@ -153,7 +153,7 @@ generate
                     if (!rst_n) begin
                         comb <= {(BOUT){1'd0}};
                         comb1 <= {(BOUT){1'd0}};
-                    end else if (enable_cic && dval) begin  // Ìí¼Óenable¿ØÖÆ
+                    end else if (enable_cic && dval) begin  // æ·»åŠ enableæ§åˆ¶
                         comb <= LOOP2[j-1].sub;
                         comb1 <= comb;
                     end
@@ -163,7 +163,7 @@ generate
     end
 endgenerate
 
-// ×îºóÒ»¼¶Î¢·ÖÆ÷µÄÊä³ö×÷ÎªÄ£¿éµÄ×îÖÕÊä³ö
+// æœ€åä¸€çº§å¾®åˆ†å™¨çš„è¾“å‡ºä½œä¸ºæ¨¡å—çš„æœ€ç»ˆè¾“å‡º
 assign dout = LOOP2[N-1].sub;
 
 endmodule
